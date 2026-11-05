@@ -1,0 +1,22 @@
+Unbalanced missing rates before recovery: [0.04848 0.103 0.1515]
+Missing rates after recovery: [0 0 0]
+View reliability: [0.9661 0.9279 0.894]
+View weights: [0.3563 0.3323 0.3114]
+Yale_MissingRatio0_1: N=165 classes=15 V=3 dimensions=[4096 3304 6750] viewMR=[0.048485 0.10303 0.15152] meanMR=0.101010
+正在使用 'Processes' 配置文件启动并行池(parpool)...
+保留 ID 为 1 2 的作业，因为它们包含崩溃转储文件。
+您可以使用 'delete(myCluster.Jobs)' 来删除使用配置文件 Processes 创建的所有作业。要创建 'myCluster'，请使用 'myCluster = parcluster('Processes')'。
+
+{错误使用 parpool (第 132 行)
+并行池无法启动，出现以下错误。有关更多详细信息，请验证集群配置文件管理器中的配置文件 'Processes'。
+
+出错 RunFedUIMUFS_RSHBO (第 135 行)
+            parpool('Processes',requestedWorkers);
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+出错 Main_FedUIMUFS (第 49 行)
+Summary = RunFedUIMUFS_RSHBO(dataFile, config);
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+原因:
+    错误使用 parallel.internal.pool.JobStateChecker>iThrowIfBadParallelJobStatus (第 95 行)
+    The parallel pool job errored with the following message: MATLAB worker shut down unexpectedly with status -1073741819 during task execution.
+} 

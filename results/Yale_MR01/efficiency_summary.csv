@@ -1,0 +1,2 @@
+Dataset,MeanRounds,SDRounds,ConvergedFraction,MeanTotalPayloadBytes,SDTotalPayloadBytes,MeanTotalPayloadMiB,MeanUplinkPayloadBytesPerRound,MeanDownlinkPayloadBytesPerRound
+Yale_MR01,6,0.587220219514703,1,152821680,14956663.412701,145.742111206055,16980280,8490000

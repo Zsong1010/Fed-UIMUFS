@@ -1,0 +1,5 @@
+Fed-UIMUFS multi-view experiment package
+Version: 11.04
+Method branch: Client-Side Coupled Optimization (corrected URTAL-RSHBO) + erver-Side Reliability-Aware Federated Aggregation (secure RAFA)
+Input: user-supplied unbalanced incomplete multi-view MAT file
+Date: 2026-11-04

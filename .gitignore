@@ -1,0 +1,10 @@
+# MATLAB generated files
+*.asv
+*.m~
+matlab_crash_dump.*
+
+# Re-run outputs (published reference CSVs stay tracked)
+/results/reruns/
+
+# Dataset inputs are user-provided and excluded from public commits
+/dataset/*.mat
