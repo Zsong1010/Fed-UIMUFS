@@ -1,0 +1,38 @@
+--- Fed-UIMUFS communication round 1 ---
+SGHBO fitness 8.11436 -> 8.11436; concentration weight 2.632; row threshold 0.25
+SGHBO fitness 7.60871 -> 7.60871; concentration weight 2.435; row threshold 0.25
+SGHBO fitness 7.70883 -> 7.70883; concentration weight 2.476; row threshold 0.25
+SGHBO fitness 7.61729 -> 7.61729; concentration weight 2.431; row threshold 0.25
+SGHBO fitness 7.63357 -> 7.63357; concentration weight 2.462; row threshold 0.25
+--- Fed-UIMUFS communication round 2 ---
+SGHBO fitness 8.19382 -> 8.19382; concentration weight 2.632; row threshold 0.25
+SGHBO fitness 7.66467 -> 7.66467; concentration weight 2.453; row threshold 0.25
+SGHBO fitness 7.76365 -> 7.76365; concentration weight 2.494; row threshold 0.25
+SGHBO fitness 7.67897 -> 7.67897; concentration weight 2.451; row threshold 0.25
+SGHBO fitness 7.69374 -> 7.69374; concentration weight 2.481; row threshold 0.25
+--- Fed-UIMUFS communication round 3 ---
+SGHBO fitness 8.22977 -> 8.22977; concentration weight 2.644; row threshold 0.25
+SGHBO fitness 7.67623 -> 7.67623; concentration weight 2.457; row threshold 0.25
+SGHBO fitness 7.77439 -> 7.77439; concentration weight 2.498; row threshold 0.25
+SGHBO fitness 7.69718 -> 7.69718; concentration weight 2.457; row threshold 0.25
+SGHBO fitness 7.70318 -> 7.70318; concentration weight 2.484; row threshold 0.25
+--- Fed-UIMUFS communication round 4 ---
+SGHBO fitness 8.23296 -> 8.23296; concentration weight 2.645; row threshold 0.25
+SGHBO fitness 7.68041 -> 7.68041; concentration weight 2.458; row threshold 0.25
+SGHBO fitness 7.77627 -> 7.77627; concentration weight 2.499; row threshold 0.25
+SGHBO fitness 7.70425 -> 7.70425; concentration weight 2.459; row threshold 0.25
+SGHBO fitness 7.70724 -> 7.70724; concentration weight 2.486; row threshold 0.25
+--- Fed-UIMUFS communication round 5 ---
+SGHBO fitness 8.23414 -> 8.23414; concentration weight 2.645; row threshold 0.25
+SGHBO fitness 7.68386 -> 7.68386; concentration weight 2.459; row threshold 0.25
+SGHBO fitness 7.77915 -> 7.77915; concentration weight 2.5; row threshold 0.25
+SGHBO fitness 7.70341 -> 7.70341; concentration weight 2.459; row threshold 0.25
+SGHBO fitness 7.70721 -> 7.70721; concentration weight 2.486; row threshold 0.25
+--- Fed-UIMUFS communication round 6 ---
+SGHBO fitness 8.23473 -> 8.23473; concentration weight 2.645; row threshold 0.25
+SGHBO fitness 7.68545 -> 7.68545; concentration weight 2.46; row threshold 0.25
+SGHBO fitness 7.779 -> 7.779; concentration weight 2.5; row threshold 0.25
+SGHBO fitness 7.70423 -> 7.70423; concentration weight 2.459; row threshold 0.25
+SGHBO fitness 7.70765 -> 7.70765; concentration weight 2.486; row threshold 0.25
+Fed-UIMUFS mean objective converged; stopping communication rounds.
+Mean local objective 5.3129232 after 6 communication rounds (relative mean-objective change below tolerance).

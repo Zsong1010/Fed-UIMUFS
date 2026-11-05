@@ -61,7 +61,7 @@ client_rng_states = cell(1, K);
 if parallel_clients
     % Give each simulated client a reproducible stream that advances across rounds.
     parallel_seed = get_option(options, 'parallel_seed', ...
-        get_option(options, 'rshbo_fitness_seed', 42));
+        get_option(options, 'sghbo_fitness_seed', 42));
     caller_rng_state = rng;
     for k = 1:K
         rng(parallel_seed + k, 'twister');

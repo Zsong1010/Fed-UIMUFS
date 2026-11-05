@@ -1,14 +1,6 @@
 # Fed-UIMUFS
 
-# Fed-UIMUFS
-
-MATLAB implementation of **Fed-UIMUFS**, a reliability-aware framework for federated unsupervised feature selection from
-unbalanced incomplete multi-view data. It combines reliability-guided tensor-aligned learning (URTAL), structure-guided
-Heavy-Ball optimization (RSHBO), and reliability-aware federated aggregation (RAFA). The local coupled optimization module
-is denoted by `URTAL-RSHBO` in the code. The implementation also includes pairwise masking for aggregation.
-
-The experiment code supports compatible multi-view `.mat`datasets. The bundled example data and reference results
-use Yale. See [DATASET_NOTICE.md](DATASET_NOTICE.md) for data provenance and usage terms.
+MATLAB implementation of **Fed-UIMUFS**, a reliability-aware framework for federated unsupervised feature selection from unbalanced incomplete multi-view data. It combines reliability-guided tensor-aligned learning (RGTAL), structure-guided Heavy-Ball optimization (SGHBO), and reliability-aware federated aggregation (RAFA). The local coupled optimization module is denoted by `RGTAL-SGHBO`; the implementation also includes pairwise-masked aggregation and corrected FedProx updates. The experiment code accepts any compatible multi-view MAT file and is not tied to a particular dataset. Reference metrics and the bundled Yale examples are provided; see `DATASET_NOTICE.md` for dataset provenance and terms.
 
 ## Run on a dataset
 
@@ -24,7 +16,7 @@ Or pass a path directly:
 Summary = Main_FedUIMUFS('dataset/my_dataset.mat');
 ```
 
-`Main_FedUIMUFS.m` is the user-facing main function. To use another dataset, select its file or change the path in the call above. The function name, experiment driver, and default protocol are dataset-independent. The lower-level runner is `experiments/RunFedUIMUFS_RSHBO.m`.
+`Main_FedUIMUFS.m` is the user-facing main function. To use another dataset, select its file or change the path in the call above. The function name, experiment driver, and default protocol are dataset-independent. The lower-level runner is `experiments/RunFedUIMUFS_SGHBO.m`.
 
 ## Input MAT-file format
 
@@ -37,7 +29,7 @@ Represent a missing view for a sample with a column containing only `NaN`. Obser
 
 ## Default experiment settings
 
-The main function uses seeds 2101–2130, five simulated clients, feature ratio 0.4, at most 10 communication rounds, 15 RSHBO particles, 10 RSHBO iterations, Gamma=2, feature-wise z-scoring, early stopping at tolerance 1e-4, and eight parallel seed workers. It requires MATLAB R2025b or compatible and Parallel Computing Toolbox. New runs are written under `results/reruns/`, which is excluded by `.gitignore`.
+The main function uses seeds 2101–2130, five simulated clients, feature ratio 0.4, at most 10 communication rounds, 15 SGHBO particles, 10 SGHBO iterations, Gamma=2, feature-wise z-scoring, early stopping at tolerance 1e-4, and eight parallel seed workers. It requires MATLAB R2025b or compatible and Parallel Computing Toolbox. New runs are written under `results/reruns/`, which is excluded by `.gitignore`.
 
 Pass a config struct as the second argument to override settings. For example, a quick one-seed run is:
 

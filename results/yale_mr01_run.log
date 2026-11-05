@@ -10,11 +10,11 @@ Yale_MissingRatio0_1: N=165 classes=15 V=3 dimensions=[4096 3304 6750] viewMR=[0
 {错误使用 parpool (第 132 行)
 并行池无法启动，出现以下错误。有关更多详细信息，请验证集群配置文件管理器中的配置文件 'Processes'。
 
-出错 RunFedUIMUFS_RSHBO (第 135 行)
+出错 RunFedUIMUFS_SGHBO (第 135 行)
             parpool('Processes',requestedWorkers);
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 出错 Main_FedUIMUFS (第 49 行)
-Summary = RunFedUIMUFS_RSHBO(dataFile, config);
+Summary = RunFedUIMUFS_SGHBO(dataFile, config);
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 原因:
     错误使用 parallel.internal.pool.JobStateChecker>iThrowIfBadParallelJobStatus (第 95 行)

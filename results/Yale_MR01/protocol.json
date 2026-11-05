@@ -51,7 +51,7 @@
   ],
   "feature_ratio": 0.4,
   "maximum_rounds": 10,
-  "method": "URTAL-RSHBO + secure RAFA + corrected FedProx",
+  "method": "RGTAL-SGHBO + secure RAFA + corrected FedProx",
   "preprocessing": "ImputeUnbalancedViews(feature_zscore) + column L2; input missing masks preserved",
   "mask_aware_observed": false,
   "federated_early_stopping": true,
@@ -67,8 +67,8 @@
     "FederatedFeatureSelection": "c58e546f870193d4294fb3fac4174bd285b97cf002064ddc53bc624b6d2c3fde",
     "ClientCoupledOptimization": "966cea199ab705080587e75b66c88c2527c6fb708eba1e70d88592a334b445bb",
     "ImputeUnbalancedViews": "c8f533cba1b0b2c9896dd593cbe980c392edcfda80269e54d88409bcc5aff6ef",
-    "RunFedUIMUFS_RSHBO": "cdfd5976d5d3494bb0f623bd5afdf1b8b6d8e07de89f4704160d4920bf9cca84"
+    "RunFedUIMUFS_SGHBO": "cdfd5976d5d3494bb0f623bd5afdf1b8b6d8e07de89f4704160d4920bf9cca84"
   },
-  "source_code_sha256_note": "The imputation function was renamed after this run; this recorded hash refers to the same implementation before renaming.",
+  "source_code_sha256_note": "The imputation function and method names were updated after this run. Recorded hashes refer to the pre-rename source files; experiment measurements are unchanged.",
   "created": "2026-10-30 23:07:06"
 }

@@ -23,8 +23,8 @@ config = set_default(config, 'MaxRounds', 10);
 config = set_default(config, 'RequireUnbalanced', true);
 config = set_default(config, 'RequireIncomplete', true);
 config = set_default(config, 'ResultsRoot', fullfile(root, 'results', 'reruns'));
-config = set_default(config, 'RSHBOParticles', 15);
-config = set_default(config, 'RSHBOIterations', 10);
+config = set_default(config, 'SGHBOParticles', 15);
+config = set_default(config, 'SGHBOIterations', 10);
 config = set_default(config, 'ImputationStandardization', 'feature_zscore');
 config = set_default(config, 'MaskAwareObserved', false);
 config = set_default(config, 'FederatedEarlyStopping', true);
@@ -36,7 +36,7 @@ config = set_default(config, 'ParallelClients', false);
 config = set_default(config, 'ParallelClientWorkers', 0);
 
 addpath(fullfile(root, 'experiments'));
-Summary = RunFedUIMUFS_RSHBO(dataFile, config);
+Summary = RunFedUIMUFS_SGHBO(dataFile, config);
 end
 
 function config = set_default(config, fieldName, defaultValue)

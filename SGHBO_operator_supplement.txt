@@ -1,0 +1,40 @@
+\noindent\textbf{Stochastic Direction Operator.}
+Let $\mathbf x,\mathbf p,\mathbf b\in\mathbb R^m$
+denote the vectorized current candidate,
+its stored historical position, and the population best.
+For $\ell=0,1,2$, let
+$\mathbf a_\ell,\mathbf d_\ell\sim\mathcal U(0,1)^m$
+and $u_\ell,v_\ell,t_\ell\sim\mathcal U(0,1)$.
+We also draw $\mathbf z\sim\mathcal U(0,1)^m$
+and a scalar $\zeta\sim\mathcal N(0,1)$.
+The operator uses
+\begin{equation}
+\begin{aligned}
+\mathbf s_0&=
+\frac{\mathbf a_0\circ(\mathbf x-\mathbf b)}
+{(\mathbf p-u_0\mathbf x)\circ(\mathbf p-v_0\mathbf b)
++\varepsilon\mathbf1_m},\\
+\mathbf s_1&=
+\frac{\mathbf a_1\circ(2\mathbf x-\mathbf p-\mathbf b)}
+{(\mathbf x-u_1\mathbf p)\circ(\mathbf x-v_1\mathbf b)
++\varepsilon\mathbf1_m},\\
+\mathbf s_2&=
+\frac{\mathbf a_2\circ(\mathbf x-\mathbf p)}
+{(\mathbf b-u_2\mathbf p)\circ(\mathbf b-v_2\mathbf x)
++\varepsilon\mathbf1_m},\\
+\mathbf y_0&=\mathbf d_0\circ(\mathbf b-t_0\mathbf p),\\
+\mathbf y_1&=\mathbf d_1\circ(\mathbf b-t_1\mathbf x),\\
+\mathbf y_2&=\mathbf d_2\circ(\mathbf b-t_2\mathbf z),\\
+\widetilde{\mathbf g}
+&=\zeta(\mathbf y_0\circ\mathbf s_0
++\mathbf y_1\circ\mathbf s_1+\mathbf y_2\circ\mathbf s_2).
+\end{aligned}
+\label{eq:sghbo_base_operator}
+\end{equation}
+All fractions are elementwise.
+The symbol $\circ$ denotes elementwise multiplication,
+and $\mathbf1_m$ is the all-ones vector.
+The constant $\varepsilon$ stabilizes the denominators.
+The view-specific block of $\widetilde{\mathbf g}$
+is reshaped to obtain $\widetilde{\mathbf G}_p^s$
+in the main text.

@@ -1,21 +1,21 @@
 function [W, Xhat, objval, trace] = ClientCoupledOptimization(X, c, options)
-%CLIENTCOUPLEDOPTIMIZATION Client-side URTAL--RSHBO coupled optimization.
+%CLIENTCOUPLEDOPTIMIZATION Client-side RGTAL--SGHBO coupled optimization.
 % X{v}: d_v-by-n local view; missing samples are NaN columns.
 % c: number of clusters, also used as the latent and anchor dimension.
 % W: local view selectors. Xhat: completed local views.
-% objval: the final local URTAL objective, including FedProx when enabled.
-% Optional trace: raw URTAL objectives (including initialization) and RSHBO
+% objval: the final local RGTAL objective, including FedProx when enabled.
+% Optional trace: raw RGTAL objectives (including initialization) and SGHBO
 % elite fitness/objective values. Logging does not change optimizer updates.
 %
-% With options.use_rshbo=true, URTAL initializes selectors and RSHBO refines
+% With options.use_sghbo=true, RGTAL initializes selectors and SGHBO refines
 % their continuous coefficients. Each candidate fitness evaluation optimizes
-% the remaining URTAL variables with that candidate selector fixed.
-% options.fixed_W evaluates a supplied selector through the same URTAL
-% updates; use_rshbo=false selects the analytical URTAL ablation.
+% the remaining RGTAL variables with that candidate selector fixed.
+% options.fixed_W evaluates a supplied selector through the same RGTAL
+% updates; use_sghbo=false selects the analytical RGTAL ablation.
 % options.fedprox_center supplies the previous global selectors when used.
 % options.use_legacy_hbo enables the historical HBO comparison branch.
 % The analytical solver is adapted from TIME-FS; see the source citation
-% in the project README. RSHBO and the federated extensions are local changes.
+% in the project README. SGHBO and the federated extensions are local changes.
 
 trace = struct();
 record_trace = nargout > 3;
@@ -36,15 +36,15 @@ if ~isfield(options, 'use_legacy_hbo')
     options.use_legacy_hbo = false;
 end
 if isfield(options, 'fixed_W') && ~isempty(options.fixed_W)
-    [W, Xhat, objval] = urtal_optimize_given_selector(X, c, options, options.fixed_W);
+    [W, Xhat, objval] = rgtal_optimize_given_selector(X, c, options, options.fixed_W);
     trace.mode = 'fixed selector evaluation';
     return;
 end
-if isfield(options, 'use_rshbo') && options.use_rshbo
+if isfield(options, 'use_sghbo') && options.use_sghbo
     if record_trace
-        [W, Xhat, objval, trace] = rshbo_refine_selectors(X, c, options);
+        [W, Xhat, objval, trace] = sghbo_refine_selectors(X, c, options);
     else
-        [W, Xhat, objval] = rshbo_refine_selectors(X, c, options);
+        [W, Xhat, objval] = sghbo_refine_selectors(X, c, options);
     end
     return;
 end
@@ -64,7 +64,7 @@ if isfield(options, 'use_legacy_hbo') && options.use_legacy_hbo
     n_elite = max(2, floor(num_particles / 3));
 
     % --- Hot-start initialization ---
-    [W0, ~] = urtal_optimize(X, c, options);
+    [W0, ~] = rgtal_optimize(X, c, options);
     w0 = [];
     for v = 1:V
         w0 = [w0, W0{v}(:)']; %#ok<AGROW>
@@ -166,50 +166,50 @@ if isfield(options, 'use_legacy_hbo') && options.use_legacy_hbo
         W{v} = reshape(gbest(cnt+1:cnt+d*options.k), d, options.k);
         cnt = cnt + d*options.k;
     end
-    [W, Xhat, ~] = urtal_optimize_given_selector(X, c, options, W);
-    [W2, ~] = urtal_optimize(X, c, options);
+    [W, Xhat, ~] = rgtal_optimize_given_selector(X, c, options, W);
+    [W2, ~] = rgtal_optimize(X, c, options);
     for v = 1:V
         W{v} = 0.7 * W{v} + 0.3 * W2{v};
     end
-    [W, Xhat, objval] = urtal_optimize_given_selector(X, c, options, W);
+    [W, Xhat, objval] = rgtal_optimize_given_selector(X, c, options, W);
     return;
 end
-% ========== Inner URTAL analytical optimization ==========
+% ========== Inner RGTAL analytical optimization ==========
 if record_trace
-    [W, Xhat, objval, trace.urtal] = urtal_optimize(X, c, options);
-    trace.mode = 'analytical URTAL';
+    [W, Xhat, objval, trace.rgtal] = rgtal_optimize(X, c, options);
+    trace.mode = 'analytical RGTAL';
 else
-    [W,Xhat,objval] = urtal_optimize(X,c,options);
+    [W,Xhat,objval] = rgtal_optimize(X,c,options);
 end
 end
 
-function [W, Xhat, objval, trace] = rshbo_refine_selectors(X, c, options)
-% RSHBO selector refinement coupled to fixed-selector URTAL evaluations.
+function [W, Xhat, objval, trace] = sghbo_refine_selectors(X, c, options)
+% SGHBO selector refinement coupled to fixed-selector RGTAL evaluations.
 record_trace = nargout > 3;
 trace = struct();
 V = numel(X);
-if ~isfield(options, 'rshbo_particles'), options.rshbo_particles = 15; end
-if ~isfield(options, 'rshbo_iterations'), options.rshbo_iterations = 10; end
-if ~isfield(options, 'rshbo_eta'), options.rshbo_eta = 0.2; end
-if ~isfield(options, 'rshbo_lambda_sg'), options.rshbo_lambda_sg = 0.05; end
-if ~isfield(options, 'rshbo_con_weight'), options.rshbo_con_weight = 0.5; end
-if ~isfield(options, 'rshbo_lambda_w'), options.rshbo_lambda_w = 0.25; end
-if ~isfield(options, 'rshbo_beta_min'), options.rshbo_beta_min = 0.1; end
-if ~isfield(options, 'rshbo_beta_max'), options.rshbo_beta_max = 0.9; end
-if ~isfield(options, 'rshbo_theta'), options.rshbo_theta = 0.5; end
-if ~isfield(options, 'rshbo_nu'), options.rshbo_nu = 1; end
-if ~isfield(options, 'rshbo_xi'), options.rshbo_xi = 1; end
-if ~isfield(options, 'rshbo_acm_damping'), options.rshbo_acm_damping = 0.25; end
-if ~isfield(options, 'rshbo_fitness_seed'), options.rshbo_fitness_seed = 42; end
-if ~isfield(options, 'rshbo_elite_count')
-    options.rshbo_elite_count = max(2, floor(options.rshbo_particles / 3));
+if ~isfield(options, 'sghbo_particles'), options.sghbo_particles = 15; end
+if ~isfield(options, 'sghbo_iterations'), options.sghbo_iterations = 10; end
+if ~isfield(options, 'sghbo_eta'), options.sghbo_eta = 0.2; end
+if ~isfield(options, 'sghbo_lambda_sg'), options.sghbo_lambda_sg = 0.05; end
+if ~isfield(options, 'sghbo_con_weight'), options.sghbo_con_weight = 0.5; end
+if ~isfield(options, 'sghbo_lambda_w'), options.sghbo_lambda_w = 0.25; end
+if ~isfield(options, 'sghbo_beta_min'), options.sghbo_beta_min = 0.1; end
+if ~isfield(options, 'sghbo_beta_max'), options.sghbo_beta_max = 0.9; end
+if ~isfield(options, 'sghbo_theta'), options.sghbo_theta = 0.5; end
+if ~isfield(options, 'sghbo_nu'), options.sghbo_nu = 1; end
+if ~isfield(options, 'sghbo_xi'), options.sghbo_xi = 1; end
+if ~isfield(options, 'sghbo_acm_damping'), options.sghbo_acm_damping = 0.25; end
+if ~isfield(options, 'sghbo_fitness_seed'), options.sghbo_fitness_seed = 42; end
+if ~isfield(options, 'sghbo_elite_count')
+    options.sghbo_elite_count = max(2, floor(options.sghbo_particles / 3));
 end
 
 if record_trace
-    [W0, ~, obj0, trace.urtal] = urtal_optimize(X, c, options);
-    trace.mode = 'coupled URTAL-RSHBO';
+    [W0, ~, obj0, trace.rgtal] = rgtal_optimize(X, c, options);
+    trace.mode = 'coupled RGTAL-SGHBO';
 else
-    [W0, ~, obj0] = urtal_optimize(X, c, options);
+    [W0, ~, obj0] = rgtal_optimize(X, c, options);
 end
 d_list = cellfun(@(A) size(A, 1), X);
 w_dim = sum(d_list .* options.k);
@@ -222,15 +222,15 @@ lb = min(w0) - 2 * rad;
 ub = max(w0) + 2 * rad;
 if lb >= ub, lb = -1; ub = 1; end
 
-n_pop = options.rshbo_particles;
-n_iter = options.rshbo_iterations;
-n_elite = min(max(1, options.rshbo_elite_count), n_pop);
+n_pop = options.sghbo_particles;
+n_iter = options.sghbo_iterations;
+n_elite = min(max(1, options.sghbo_elite_count), n_pop);
 vw = ones(1, V);
 if isfield(options, 'view_weights') && numel(options.view_weights) == V
     vw = max(double(options.view_weights(:))', 0);
 end
 vw = vw / (sum(vw) + eps);
-rho = ((vw + eps) .^ options.rshbo_xi);
+rho = ((vw + eps) .^ options.sghbo_xi);
 rho = rho / max(rho);
 rho_dim = [];
 for v = 1:V
@@ -246,28 +246,28 @@ for i = (n_elite+1):n_pop
 end
 swarm = min(max(swarm, lb), ub);
 for i = 2:n_pop
-    swarm(i, :) = rshbo_project_rows(swarm(i, :), d_list, options.k, ...
-        rho, options.rshbo_eta, options.rshbo_lambda_w);
+    swarm(i, :) = sghbo_project_rows(swarm(i, :), d_list, options.k, ...
+        rho, options.sghbo_eta, options.sghbo_lambda_w);
 end
 swarm_prev = swarm + 0.05 * rad * randn(size(swarm));
 swarm_prev = min(max(swarm_prev, lb), ub);
 GSR = zeros(n_pop, w_dim);
 
-lambda_con = options.rshbo_con_weight * max(abs(obj0), 1);
+lambda_con = options.sghbo_con_weight * max(abs(obj0), 1);
 fitness = zeros(n_pop, 1);
 candidate_objective = zeros(n_pop, 1);
 for i = 1:n_pop
-    [fitness(i), candidate_objective(i)] = rshbo_candidate_fitness(swarm(i, :), X, c, options, ...
+    [fitness(i), candidate_objective(i)] = sghbo_candidate_fitness(swarm(i, :), X, c, options, ...
         d_list, rho, lambda_con);
 end
 
 initial_best_fitness = min(fitness);
 if record_trace
-    trace.rshbo.iterations = (0:n_iter)';
-    trace.rshbo.best_fitness = nan(n_iter + 1, 1);
-    trace.rshbo.selected_objective = nan(n_iter + 1, 1);
-    [trace.rshbo.best_fitness(1), initial_best_idx] = min(fitness);
-    trace.rshbo.selected_objective(1) = candidate_objective(initial_best_idx);
+    trace.sghbo.iterations = (0:n_iter)';
+    trace.sghbo.best_fitness = nan(n_iter + 1, 1);
+    trace.sghbo.selected_objective = nan(n_iter + 1, 1);
+    [trace.sghbo.best_fitness(1), initial_best_idx] = min(fitness);
+    trace.sghbo.selected_objective(1) = candidate_objective(initial_best_idx);
 end
 for iter = 1:n_iter
     [~, best_idx] = min(fitness);
@@ -281,18 +281,18 @@ for iter = 1:n_iter
     old_objective = candidate_objective;
     old_prev = swarm_prev;
     old_GSR = GSR;
-    [cand, GSR_new] = rshbo_update_population(old_swarm, old_prev, ...
+    [cand, GSR_new] = sghbo_update_population(old_swarm, old_prev, ...
         old_fitness, old_GSR, gbest, w0, rho_dim, options, iter, n_iter);
 
     for i = 1:n_pop
-        cand(i, :) = rshbo_project_rows(cand(i, :), d_list, options.k, ...
-            rho, options.rshbo_eta, options.rshbo_lambda_w);
+        cand(i, :) = sghbo_project_rows(cand(i, :), d_list, options.k, ...
+            rho, options.sghbo_eta, options.sghbo_lambda_w);
         cand(i, :) = min(max(cand(i, :), cur_lb), cur_ub);
     end
     cand_fitness = zeros(n_pop, 1);
     cand_objective = zeros(n_pop, 1);
     for i = 1:n_pop
-        [cand_fitness(i), cand_objective(i)] = rshbo_candidate_fitness(cand(i, :), X, c, ...
+        [cand_fitness(i), cand_objective(i)] = sghbo_candidate_fitness(cand(i, :), X, c, ...
             options, d_list, rho, lambda_con);
     end
 
@@ -306,8 +306,8 @@ for iter = 1:n_iter
     fitness = fitness_sorted(1:n_pop);
     candidate_objective = pool_objective(order);
     if record_trace
-        [trace.rshbo.best_fitness(iter + 1), best_trace_idx] = min(fitness);
-        trace.rshbo.selected_objective(iter + 1) = candidate_objective(best_trace_idx);
+        [trace.sghbo.best_fitness(iter + 1), best_trace_idx] = min(fitness);
+        trace.sghbo.selected_objective(iter + 1) = candidate_objective(best_trace_idx);
     end
     swarm_prev = zeros(size(swarm));
     GSR = zeros(size(swarm));
@@ -326,20 +326,20 @@ end
 
 [~, best_idx] = min(fitness);
 best_vec = swarm(best_idx, :);
-W = rshbo_decode(best_vec, d_list, options.k);
-rng(options.rshbo_fitness_seed, 'twister');
-[W, Xhat, objval] = urtal_optimize_given_selector(X, c, options, W);
-fprintf('RSHBO fitness %.6g -> %.6g; concentration weight %.4g; row threshold %.4g\n', ...
-    initial_best_fitness, min(fitness), lambda_con, options.rshbo_lambda_w);
+W = sghbo_decode(best_vec, d_list, options.k);
+rng(options.sghbo_fitness_seed, 'twister');
+[W, Xhat, objval] = rgtal_optimize_given_selector(X, c, options, W);
+fprintf('SGHBO fitness %.6g -> %.6g; concentration weight %.4g; row threshold %.4g\n', ...
+    initial_best_fitness, min(fitness), lambda_con, options.sghbo_lambda_w);
 end
 
-function [fitval, objval] = rshbo_candidate_fitness(w_vec, X, c, options, d_list, rho, lambda_con)
-W_cell = rshbo_decode(w_vec, d_list, options.k);
+function [fitval, objval] = sghbo_candidate_fitness(w_vec, X, c, options, d_list, rho, lambda_con)
+W_cell = sghbo_decode(w_vec, d_list, options.k);
 try
     % Common random numbers make candidate scores comparable and repeatable.
-    rng(options.rshbo_fitness_seed, 'twister');
+    rng(options.sghbo_fitness_seed, 'twister');
     options.fixed_selector_objective_only = true;
-    [Wfs, ~, objval] = urtal_optimize_given_selector(X, c, options, W_cell);
+    [Wfs, ~, objval] = rgtal_optimize_given_selector(X, c, options, W_cell);
     conc = 0;
     for v = 1:numel(Wfs)
         a = sqrt(sum(Wfs{v} .* Wfs{v}, 2));
@@ -354,7 +354,7 @@ catch
 end
 end
 
-function W = rshbo_decode(w_vec, d_list, k)
+function W = sghbo_decode(w_vec, d_list, k)
 W = cell(1, numel(d_list));
 offset = 0;
 for v = 1:numel(d_list)
@@ -364,8 +364,8 @@ for v = 1:numel(d_list)
 end
 end
 
-function w_vec = rshbo_project_rows(w_vec, d_list, k, rho, eta_s, lambda_w)
-W = rshbo_decode(w_vec, d_list, k);
+function w_vec = sghbo_project_rows(w_vec, d_list, k, rho, eta_s, lambda_w)
+W = sghbo_decode(w_vec, d_list, k);
 for v = 1:numel(W)
     row_norm = sqrt(sum(W{v} .* W{v}, 2));
     gamma = eta_s * rho(v) * lambda_w;
@@ -378,24 +378,24 @@ for v = 1:numel(W)
 end
 end
 
-function [Xnew, GSRnew] = rshbo_update_population(X, Xprev, Fitness, ...
+function [Xnew, GSRnew] = sghbo_update_population(X, Xprev, Fitness, ...
     GSRprev, gbest, w0, rho_dim, options, iter, max_iter)
 [N, dim] = size(X);
 Xnew = zeros(size(X));
 GSRnew = zeros(size(X));
 Xmean = mean(X, 1);
-base_beta = options.rshbo_beta_min + ...
-    (options.rshbo_beta_max - options.rshbo_beta_min) * ...
-    (1 - iter / max_iter) ^ options.rshbo_nu;
-beta = base_beta .* (options.rshbo_theta + ...
-    (1 - options.rshbo_theta) .* rho_dim);
+base_beta = options.sghbo_beta_min + ...
+    (options.sghbo_beta_max - options.sghbo_beta_min) * ...
+    (1 - iter / max_iter) ^ options.sghbo_nu;
+beta = base_beta .* (options.sghbo_theta + ...
+    (1 - options.sghbo_theta) .* rho_dim);
 
 for i = 1:N
     Xp = Xprev(i, :);
     XR = min(max(rand(1, dim), 0), 1);
-    gsr = rshbo_gradient_operator(X(i, :), gbest, Xp, XR);
-    gsr = gsr + options.rshbo_lambda_sg .* rho_dim .* (X(i, :) - w0);
-    hbsr = X(i, :) - options.rshbo_eta .* ...
+    gsr = sghbo_gradient_operator(X(i, :), gbest, Xp, XR);
+    gsr = gsr + options.sghbo_lambda_sg .* rho_dim .* (X(i, :) - w0);
+    hbsr = X(i, :) - options.sghbo_eta .* ...
         (2 .* gsr - GSRprev(i, :)) + beta .* (X(i, :) - Xp);
 
     if N > 1
@@ -424,7 +424,7 @@ y = sign(x);
 y(y == 0) = 1;
 end
 
-function GSR = rshbo_gradient_operator(X, Xbest, Xprev, XR)
+function GSR = sghbo_gradient_operator(X, Xbest, Xprev, XR)
 dim = size(X, 2);
 S0 = rand(1, dim) .* (X - Xbest) ./ ...
     (((Xprev - rand .* X) .* (Xprev - rand .* Xbest)) + eps);
@@ -438,7 +438,7 @@ Y2 = rand(1, dim) .* (Xbest - rand .* XR);
 GSR = randn .* (Y0 .* S0 + Y1 .* S1 + Y2 .* S2);
 end
 function fitval = legacy_hbo_fitness(w_vec, X, c, options, d_list, V)
-% Historical HBO fitness: local URTAL objective / feature-energy concentration.
+% Historical HBO fitness: local RGTAL objective / feature-energy concentration.
 W_cell = cell(1, V);
 cnt = 0;
 for v = 1:V
@@ -447,7 +447,7 @@ for v = 1:V
     cnt = cnt + d*options.k;
 end
 try
-    [Wfs, ~, objval] = urtal_optimize_given_selector(X, c, options, W_cell);
+    [Wfs, ~, objval] = rgtal_optimize_given_selector(X, c, options, W_cell);
     ener = [];
     for v = 1:V
         ener = [ener; sum(Wfs{v} .* Wfs{v}, 2)]; %#ok<AGROW>
@@ -467,10 +467,10 @@ if isfield(options, 'fedprox_mu') && ~isempty(options.fedprox_mu)
     mu = max(0, options.fedprox_mu);
 end
 end
-% URTAL latent-variable and completion updates for a fixed selector.
-function [W,Xhat,objval] = urtal_optimize_given_selector(X,c,options,W)
+% RGTAL latent-variable and completion updates for a fixed selector.
+function [W,Xhat,objval] = rgtal_optimize_given_selector(X,c,options,W)
 if isfield(options,'fast_fixed_selector') && options.fast_fixed_selector
-    [W,Xhat,objval] = urtal_fixed_selector_grams(X,c,options,W);
+    [W,Xhat,objval] = rgtal_fixed_selector_grams(X,c,options,W);
     return;
 end
 % Optimize Z, A, M, P, and related variables while keeping the given W fixed.
@@ -478,7 +478,7 @@ V = size(X,2);
 [~,n] = size(X{1});
 observed=cell(1,V);
 for v=1:V, observed{v}=~isnan(X{v}(1,:)); end
-% Initialize the same URTAL blocks while keeping the supplied W fixed.
+% Initialize the same RGTAL blocks while keeping the supplied W fixed.
 % -------------- Initialize E-------------- %
 G = cell(1,V); E = cell(1,V); Xhat = cell(1,V);
 for v = 1:V
@@ -528,7 +528,7 @@ for iter = 1:max_iter
        Xhat{v} = X{v}+E{v}*G{v};
     end
     alpha = updateAlpha(Xhat,W,Z,QW,options,observed);
-    obj_hist(iter) = urtal_objective(Xhat,W,Z,QW,alpha,A,M,P,options,observed);
+    obj_hist(iter) = rgtal_objective(Xhat,W,Z,QW,alpha,A,M,P,options,observed);
     if iter > 1 && abs(obj_hist(iter)-obj_hist(iter-1))<1e-3
         break
     end
@@ -536,7 +536,7 @@ end
 objval = obj_hist(iter);
 end
 
-function [W,Xhat,objval] = urtal_fixed_selector_grams(X,c,options,W)
+function [W,Xhat,objval] = rgtal_fixed_selector_grams(X,c,options,W)
 % Algebraically equivalent fixed-W updates using c-by-c/c-by-n statistics.
 % Missing columns equal W*Z after each completion update, so their
 % reconstruction residual is zero. This avoids d-by-n work every iteration.
@@ -616,8 +616,8 @@ else
 end
 end
 
-function [W,Xhat,objval,trace] = urtal_optimize(X,c,options)
-% URTAL alternating updates for W, Z, A, M, P, E and alpha.
+function [W,Xhat,objval,trace] = rgtal_optimize(X,c,options)
+% RGTAL alternating updates for W, Z, A, M, P, E and alpha.
 V = size(X,2);
 [~,n] = size(X{1});
 if ~isfield(options,'r') || isempty(options.r), options.r = c; end
@@ -665,20 +665,20 @@ M = updateM(Z,A,P,options);
 alpha = updateAlpha(Xhat,W,Z,QW,options,observed);
 
 max_iter = 30;
-if isfield(options, 'urtal_max_iterations') && ~isempty(options.urtal_max_iterations)
-    max_iter = options.urtal_max_iterations;
+if isfield(options, 'rgtal_max_iterations') && ~isempty(options.rgtal_max_iterations)
+    max_iter = options.rgtal_max_iterations;
 end
 assert(isscalar(max_iter) && max_iter >= 1 && max_iter == floor(max_iter), ...
-    'urtal_max_iterations must be a positive integer.');
+    'rgtal_max_iterations must be a positive integer.');
 early_stopping = true;
-if isfield(options, 'urtal_early_stopping') && ~isempty(options.urtal_early_stopping)
-    early_stopping = logical(options.urtal_early_stopping);
+if isfield(options, 'rgtal_early_stopping') && ~isempty(options.rgtal_early_stopping)
+    early_stopping = logical(options.rgtal_early_stopping);
 end
 record_trace = nargout > 3;
 trace = struct();
 if record_trace
     trace.objective = nan(max_iter + 1, 1);
-    trace.objective(1) = urtal_objective(Xhat,W,Z,QW,alpha,A,M,P,options,observed);
+    trace.objective(1) = rgtal_objective(Xhat,W,Z,QW,alpha,A,M,P,options,observed);
 end
 obj_hist = zeros(max_iter,1);
 for iter = 1:max_iter
@@ -692,7 +692,7 @@ for iter = 1:max_iter
        Xhat{v} = X{v}+E{v}*G{v};
     end
     alpha = updateAlpha(Xhat,W,Z,QW,options,observed);
-    obj_hist(iter) = urtal_objective(Xhat,W,Z,QW,alpha,A,M,P,options,observed);
+    obj_hist(iter) = rgtal_objective(Xhat,W,Z,QW,alpha,A,M,P,options,observed);
     if record_trace
         trace.objective(iter + 1) = obj_hist(iter);
     end
@@ -708,7 +708,7 @@ if record_trace
 end
 end
 
-function f=urtal_objective(Xhat,W,Z,QW,alpha,A,M,P,options,observed)
+function f=rgtal_objective(Xhat,W,Z,QW,alpha,A,M,P,options,observed)
 %% Input 
 % Xhat: The imputed multi-view dataset
 % W: Feature selection matrix 
