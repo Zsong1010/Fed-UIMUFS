@@ -1,3 +1,3 @@
 # Dataset inputs
 
-Place an authorized multi-view MAT file here for local runs, or pass its path to `Main_FedUIMUFS`. Dataset files are ignored by Git and are not included in this public source release. See the root `DATASET_NOTICE.md` for the Yale examples retained in the local working copy.
+The bundled Yale MAT files are tracked in this repository. Other compatible multi-view MAT files can be placed here for local runs or passed to `Main_FedUIMUFS`. See the root `DATASET_NOTICE.md` for provenance and terms.

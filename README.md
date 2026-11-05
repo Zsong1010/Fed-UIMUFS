@@ -1,6 +1,6 @@
 # Fed-UIMUFS
 
-MATLAB implementation of the local coupled optimization (URTAL-RSHBO) method, with corrected FedProx updates and pairwise-masked RAFA aggregation. The experiment code accepts any compatible multi-view MAT file and is not tied to a particular dataset. Reference metrics use Yale data, while the raw Yale MAT files are excluded from the public source release until redistribution terms are confirmed. Bring your own authorized input data; see `DATASET_NOTICE.md`.
+MATLAB implementation of the local coupled optimization (URTAL-RSHBO) method, with corrected FedProx updates and pairwise-masked RAFA aggregation. The experiment code accepts any compatible multi-view MAT file and is not tied to a particular dataset. Reference metrics and the bundled sample MAT files use Yale data; the experiment code accepts any compatible multi-view dataset. See `DATASET_NOTICE.md` for the Yale data provenance and terms.
 
 ## Run on a dataset
 
@@ -40,7 +40,7 @@ Summary = Main_FedUIMUFS('dataset/my_dataset.mat', cfg);
 
 ## Bundled Yale reference results
 
-The checked-in reference results correspond to Yale inputs at mean missing rates 0.1 and 0.4. The raw Yale MAT files are excluded from the public source release pending confirmation of redistribution terms. The checked-in results are the means of 30 seeds; percentages are shown below. F-score is the project's pairwise F1 metric.
+The checked-in reference results correspond to the bundled Yale inputs at mean missing rates 0.1 and 0.4. The checked-in results are the means of 30 seeds; percentages are shown below. F-score is the project's pairwise F1 metric.
 
 | Mean missing rate | ACC | NMI | Purity | F-score | ARI |
 |---:|---:|---:|---:|---:|---:|
