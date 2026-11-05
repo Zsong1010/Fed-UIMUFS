@@ -1,6 +1,14 @@
 # Fed-UIMUFS
 
-MATLAB implementation of the local coupled optimization (URTAL-RSHBO) method, with corrected FedProx updates and pairwise-masked RAFA aggregation. The experiment code accepts any compatible multi-view MAT file and is not tied to a particular dataset. Reference metrics and the bundled sample MAT files use Yale data; the experiment code accepts any compatible multi-view dataset. See `DATASET_NOTICE.md` for the Yale data provenance and terms.
+# Fed-UIMUFS
+
+MATLAB implementation of **Fed-UIMUFS**, a reliability-aware framework for federated unsupervised feature selection from
+unbalanced incomplete multi-view data. It combines reliability-guided tensor-aligned learning (URTAL), structure-guided
+Heavy-Ball optimization (RSHBO), and reliability-aware federated aggregation (RAFA). The local coupled optimization module
+is denoted by `URTAL-RSHBO` in the code. The implementation also includes pairwise masking for aggregation.
+
+The experiment code supports compatible multi-view `.mat`datasets. The bundled example data and reference results
+use Yale. See [DATASET_NOTICE.md](DATASET_NOTICE.md) for data provenance and usage terms.
 
 ## Run on a dataset
 
